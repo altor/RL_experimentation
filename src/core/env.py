@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 import random
 
 def compute_value(s, action, discount, state_values):
@@ -10,14 +11,14 @@ def compute_value(s, action, discount, state_values):
 
 class Environment:
     def __init__(self, init_state=None):
-        self.current_state = init_state
+        self.current_state = deepcopy(init_state)
         self.init_state = init_state
         
     def get_current_state(self):
         return self.current_state
         
     def re_init(self):
-        self.current_state = self.init_state
+        self.current_state = deepcopy(self.init_state)
 
     def next_sa(self, action):
         """
@@ -26,6 +27,20 @@ class Environment:
         self.current_state = self.current_state.next(action)
         return self.current_state
 
+class Double_Environment(Environment):
+    """
+    Environement ou deux agents peuvent intervenir
+    possède une fonction permetant de dire quand le prochain agent doit agir
+    """
+    
+    def __init__(self, init_state=None):
+         Environment.__init__(self, init_state)
+    def is_other_agent_turn(self):
+        """
+        Renvoi True si l'agent 
+        """
+        return False
+    
 class PDM(Environment):
 
     def __init__(self):
@@ -38,7 +53,7 @@ class PDM(Environment):
         
     def add_state(self, state):
         if self.init_state == None:
-            self.init_state = state
+            self.init_state = deepcopy(state)
             self.current_state = state
         state.id = len(self.states)
         self.states.append(state)
@@ -199,8 +214,14 @@ class PDM(Environment):
 class State:
     def __init__(self, reward):
         self.reward = reward
-        self.is_terminal = False
+        self.is_terminal_bool = False
         self.actions = []
+
+    def next(self):
+        return None
+        
+    def is_terminal(self):
+        return self.is_terminal_bool
         
 class Markovian_State(State):
     
@@ -208,7 +229,12 @@ class Markovian_State(State):
         State.__init__(self, reward)
         self.id = id
         self.transitions = []
-        
+    def __str__(self):
+        return str(self.id)
+
+    def __repr__(self):
+        return str(self.id)
+    
     def add_transition(self, target_state_id, action_id, probability):
         if action_id not in self.actions:
             self.actions.append(action_id)

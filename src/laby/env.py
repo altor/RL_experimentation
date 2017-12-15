@@ -1,6 +1,7 @@
 from core.env import PDM
 from core.env import Markovian_State as State
 from copy import copy, deepcopy
+from core.episode_runner import Episode_greedy
 
 def add_transition_to(state, matrix, x, y, maxX, maxY):
     # Nord
@@ -15,7 +16,7 @@ def add_transition_to(state, matrix, x, y, maxX, maxY):
     # Sud
     if y + 1 < maxY and matrix[y+1][x][1] != 1:
         state.add_transition(matrix[y+1][x][0], 'S', 1)
-    state.add_transition(state.id, 'R', 1)
+    # state.add_transition(state.id, 'R', 1)
 
 
 
@@ -24,6 +25,7 @@ class PDM_laby(PDM):
     
     def __init__(self, input_file):
         PDM.__init__(self)
+        self.max_score = int(next(input_file))
         w, h = [int(x) for x in next(input_file).split()]
 
         self.sizeY = int(w)
@@ -66,13 +68,37 @@ class PDM_laby(PDM):
                 state = State(state_id, reward)
 
                 if state_type == 2:
-                    state.is_terminal = True
+                    state.is_terminal_bool = True
                 self.coordinates[state_id] = (i,j)
                 add_transition_to(state, self.matrix, j, i,
                                   self.sizeX, self.sizeY)
 
                 self.add_state(state)
 
+    def __str__(self):
+        s = ""
+
+        # Murs
+        for i in range(self.sizeY):
+            for j in range(self.sizeX):
+                if self.matrix[i][j][1] == 1:
+                    s += "|###|"
+                elif self.matrix[i][j][1] == 2:
+                    s += "| E |"
+                else:
+                    id = self.matrix[i][j][0]
+                    if id < 10:
+                        s += "|  " + str(id) + "|"
+                    elif id < 100:
+                        s += "| " + str(id) + "|"
+                    else:
+                        s += "|" + str(id) + "|"
+            s +="\n"
+        return s
+        
+
+
+                
     def print_states_id(self):
         print_matrice = deepcopy(self.matrix)
 
@@ -103,13 +129,18 @@ class PDM_laby(PDM):
                 else:
                     print_matrice[i][j] = " "
         # Chemin
+        coordinates = self.coordinates
+        
+        class Episode_print_path (Episode_greedy):
+            def __init__(self, agent, environment) :
+                Episode_greedy.__init__(self, agent, environment)
+            def function(self, s, r, a):
+                result = Episode_greedy.function(self,s,r,a)
+                i,j = coordinates[s.id]
+                print_matrice[i][j] = '.'
+                return result
 
-        while self.current_state_id != self.final_state_id:
-            i,j = self.coordinates[self.current_state_id]
-            print_matrice[i][j] = '.'
-            action = agent.decide(self.current_state)
-            self.next_sa(action)
-
+        Episode_print_path(agent, self).run()
         
         # Affichage
         for i in range(self.sizeY):

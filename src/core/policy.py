@@ -2,10 +2,23 @@ import random
 
 
 class Virtual_Greedy:
-    # def __init__(self):
-    #     self.a=None
 
+    def __init__(self):
+        self.displayers = []
+
+
+    def add_displayer(self, displayer):
+        self.displayers.append(displayer)
+        
+    def remove_displayer(self, displayer):
+        if displayer in self.displayers:
+            i = self.displayers.index(displayer)
+            del self.displayers[i]
+        self.displayers.append(displayer)
+        
     def new_episode(self):
+        for displayer in self.displayers:
+            displayer.end_episode()
         return None
     
     def greedy_choice(self, state, q_values):
@@ -14,10 +27,10 @@ class Virtual_Greedy:
         best_action = actions[0]
         best_action_value = -1000
         for action in state.actions:
-            if (state, action) in q_values:
-                if q_values[(state, action)] > best_action_value:
+            if (state.id, action) in q_values:
+                if q_values[(state.id, action)] > best_action_value:
                     best_action = action
-                    best_action_value = q_values[(state, action)]
+                    best_action_value = q_values[(state.id, action)]
         return best_action
 
     def random_choice(self, state):
@@ -25,30 +38,37 @@ class Virtual_Greedy:
         i = random.randint(0, len(actions) - 1)
         return actions[i]
 
-
 class Greedy(Virtual_Greedy):
+    def __init__(self):
+        Virtual_Greedy.__init__(self)
+    
     def action(self, state, q_values, sa_frequency):
-        return self.greedy_choice(state, q_values)
+        action = self.greedy_choice(state, q_values)
+        for displayer in self.displayers:
+            displayer.notify(state, action, q_value, False)
+        return action
     
     
 class N_Greedy(Virtual_Greedy):
     def __init__(self, n):
+        Virtual_Greedy.__init__(self)
         """
         :param n: 0 < n < 1 probability to choose a random choice
         """
         self.n = n
 
-    def new_episode(self):
-        print(self.n, end = " ")
-        
     def action(self, state, q_values, sa_frequency):
 
         if random.random() < self.n:
-            # print(str(self.n) + " random")
-            return self.random_choice(state)
+            action = self.random_choice(state)
+            for displayer in self.displayers:
+                displayer.notify(state, action, True)
+            return action
         else:
-            # print(str(self.n) + " greedy")
-            return self.greedy_choice(state, q_values)
+            action = self.greedy_choice(state, q_values)
+            for displayer in self.displayers:
+                displayer.notify(state, action, False)
+            return action
         
 
 class Simulated_Anealing_N_Greedy(N_Greedy):
@@ -70,11 +90,19 @@ class N_freq_greedy(Virtual_Greedy):
         """
         :param n: number of time the action must be called before make a random choice
         """
+        Virtual_Greedy.__init__(self)
         self.n = n
 
     def action(self, state, q_values, sa_frequency):
         action = self.greedy_choice(state, q_values)
-        id = (state, action)
+        id = (state.id, action)
         if id in sa_frequency and sa_frequency[id] < self.n:
+            for displayer in self.displayers:
+                displayer.notify(state, action, False)
             return action
-        return self.random_choice(state)
+        random_action = self.random_choice(state)
+        for displayer in self.displayers:
+            displayer.notify(state, random_action, True)
+        return random_action
+
+
