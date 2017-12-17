@@ -18,7 +18,6 @@ class Agent:
         self.q_values = {}
         self.sa_frequency = {}
 
-
     def add_displayer(self, displayer):
         self.policy.add_displayer(displayer)
 
@@ -39,7 +38,6 @@ class Agent:
         action = self.policy.action(state, self.q_values,
                                     self.sa_frequency)
         self.previous_action = action
-        # print("choosen action : " + str(action) + " state : " + str(state))
         return action
         
     def compute_q_value(self, state, reward, learning_rate, discount, agent_actions):
@@ -57,6 +55,7 @@ class Agent:
             if previous_id in self.sa_frequency:
                 self.sa_frequency[previous_id] += 1
             else:
+                print(str(len(self.sa_frequency)) + " " + str(previous_id))
                 self.sa_frequency[previous_id] = 1
             
             # recherche de la meilleur valeur q(s', a')
@@ -71,13 +70,15 @@ class Agent:
 
             alpha = learning_rate / (learning_rate +
                                      self.sa_frequency[previous_id])
+
+            td_error = (self.previous_reward + discount * max_qvalue
+                    - self.q_values[previous_id])
+
+            for displayer in self.policy.displayers:
+                displayer.notify_td_error(self.previous_state, self.previous_action, td_error)
+            
             # print(max_qvalue)
-            self.q_values[previous_id] += (
-                alpha * (
-                    self.previous_reward + discount * max_qvalue
-                    - self.q_values[previous_id]
-                )
-            )
+            self.q_values[previous_id] += alpha * td_error
 
         self.previous_state = state
         self.previous_reward = reward

@@ -45,7 +45,7 @@ class Greedy(Virtual_Greedy):
     def action(self, state, q_values, sa_frequency):
         action = self.greedy_choice(state, q_values)
         for displayer in self.displayers:
-            displayer.notify(state, action, q_value, False)
+            displayer.notify(state, action, False)
         return action
     
     
