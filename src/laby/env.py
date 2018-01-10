@@ -46,7 +46,7 @@ class PDM_laby(PDM):
                 elif line[i] == 'E':
                     self.matrix[j][i] = (state_id, 0)
                     self.current_state_id = state_id
-                    state_id += 1    
+                    state_id += 1
                 elif line[i] == 'S':
                     self.matrix[j][i] = (state_id, 2)
                     self.final_state_id = state_id

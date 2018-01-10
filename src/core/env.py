@@ -13,12 +13,14 @@ class Environment:
     def __init__(self, init_state=None):
         self.current_state = deepcopy(init_state)
         self.init_state = init_state
+        self.render_bool=False
         
     def get_current_state(self):
         return self.current_state
         
     def re_init(self):
         self.current_state = deepcopy(self.init_state)
+
 
     def next_sa(self, action):
         """
@@ -212,21 +214,25 @@ class PDM(Environment):
         return np.average(v)
 
 class State:
-    def __init__(self, reward):
+    def __init__(self, reward, actions=None, is_terminal_bool=False):
         self.reward = reward
-        self.is_terminal_bool = False
-        self.actions = []
+        self.is_terminal_bool = is_terminal_bool
+        self.actions = actions
 
     def next(self):
         return None
         
     def is_terminal(self):
+        # print("tutu")
         return self.is_terminal_bool
+
+    def to_space_grid_coord(self):
+        return self.id
         
 class Markovian_State(State):
     
     def __init__(self, id, reward):
-        State.__init__(self, reward)
+        State.__init__(self, reward, actions=[])
         self.id = id
         self.transitions = []
     def __str__(self):

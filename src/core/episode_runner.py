@@ -63,11 +63,20 @@ class Episode_train(Episode_runner):
         self.learning_rate = learning_rate
         self.discount = discount
 
-    def function(self, state, reward, action):
+    def function(self, state, reward, actions):
         # print(str(state) + " " + str(reward) + " " + str(action))
         # print(str(self.learning_rate) + " " + str(self.discount))
+        if self.environment.render_bool and self.agent.previous_state != None:
+            id = (self.agent.previous_state.id, self.agent.previous_action)
+            txt1 = (self.agent.q_values[id]
+                    if id in self.agent.q_values
+                    else "none")
+            txt2 = self.agent.policy.rendering_info
+            self.environment.render(txt1, txt2, waitkey=False)
+
         self.agent.compute_q_value(state, reward, self.learning_rate,
                                    self.discount, state.actions)
+
         return True
 
 class Double_episode(Episode_runner):
