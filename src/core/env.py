@@ -52,6 +52,8 @@ class PDM(Environment):
         self.current_state_id = 0
         self.final_state_id = -1
         self.mem = 0
+        self.nb_step = 0
+                
         
     def add_state(self, state):
         if self.init_state == None:
@@ -75,7 +77,7 @@ class PDM(Environment):
         id = self.current_state_id
         self.current_state_id = self.states[id].next_id(action)
         self.current_state = self.states[self.current_state_id]
-
+        self.nb_step += 1
         return self.states[self.current_state_id]
     
     def next(self):
@@ -86,6 +88,7 @@ class PDM(Environment):
     def re_init(self):
         Environment.re_init(self)
         self.current_state_id = 0
+        self.nb_step = 0
 
     def get_current_state(self):
         return self.states[self.current_state_id]

@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
+nb_td_error = 10
+
 class Log_displayer:
     def __init__(self, agent, environment, output=sys.stdout, shape_state_space=1):
         """
@@ -53,15 +55,15 @@ class Log_displayer:
     def display_q_acc(self):
         graph = {}
 
-        error_indicators = {}
+        # error_indicators = {}
         
         for ((state, action), (nb, td_error_acc)) in self.acc_q.items():
             if not action in graph:
                 graph[action] = np.zeros(self.shape_state_space)
-                error_indicators[action] = []
+                # error_indicators[action] = []
 
-            (graph[action])[state.to_space_grid_coord()] = td_error_acc / nb
-            error_indicators[action].append(td_error_acc / nb)
+            (graph[action])[state.to_space_grid_coord()] = td_error_acc 
+            # error_indicators[action].append(td_error_acc / (nb - nb_td_error))
 
         for (action, array) in graph.items():
             fig, ax = plt.subplots()
@@ -71,9 +73,9 @@ class Log_displayer:
     
             plt.show()
 
-        for (action, data_list) in error_indicators.items():
-            data = np.array(data_list)
-            print(str(action) + " : " + str(np.mean(data)) + ";" + str(np.var(data)))
+        # for (action, data_list) in error_indicators.items():
+        #     data = np.array(data_list)
+        #     print("###" + str(action) + " : " + str(np.mean(data)) + ";" + str(np.var(data)))
 
     def display_state_grid(self):
         fig, ax = plt.subplots()
@@ -90,6 +92,6 @@ class Log_displayer:
     def notify_td_error(self, state, action, td_error):
         if (state, action) in self.acc_q:
             n, td_error_acc = self.acc_q[(state, action)]
-            self.acc_q[(state, action)] = (n + 1, td_error_acc + td_error)
+            self.acc_q[(state, action)] = (n + 1, td_error_acc + abs(td_error))
         else:
-            self.acc_q[(state, action)] = (1, td_error)
+            self.acc_q[(state, action)] = (1, abs(td_error))

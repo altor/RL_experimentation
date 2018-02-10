@@ -20,6 +20,10 @@ class MC_State_gym_discrete(State):
         
         self.velocity = gym_state[1]
         self.position = gym_state[0]
+        if self.position >= 0.5:
+            self.reward = 1
+        else:
+            self.reward = reward
         self.grid_shape = grid_shape
         self.is_terminal_bool = is_terminal
         self.nb_step = nb_step
@@ -31,8 +35,10 @@ class MC_State_gym_discrete(State):
         # if self.nb_step >= self.max_step:
         #     return True
         if self.position >= 0.5:
-            print("ok" + str(self.nb_step))
+            # print("toto")
             return True
+            # print(str(self.nb_step))
+
 
         return False
         
@@ -99,6 +105,7 @@ class MC_gym_environment(Environment):
             self.render()
         self.nb_step += 1
         gym_state, r, is_terminal, _ = self.gym_env.step(action + 1)
+
         self.current_state = MC_State_gym_discrete(gym_state, r,
                                                    is_terminal,
                                                    self.grid_shape, self.nb_step, self.max_step)
@@ -127,7 +134,7 @@ class MC_State_naive_discrete(Markovian_State):
         self.position = init_position
         self.grid_shape = grid_shape
         
-        if self.position >= 0.6:
+        if self.position >= 0.5:
             self.reward = 1
 
         self.id = (round(self.velocity, grid_shape),

@@ -51,8 +51,9 @@ class Agent:
         actions = agent_actions.copy()
         random.shuffle(actions)
         if state.is_terminal():
-            self.q_values.set_value(state.id, None, reward)
-            actions.append(None)
+            self.q_values.set_value(state.id, 0, reward)
+            # self.q_values.get_value(state.id, None, reward)
+            # actions.append(None)
         if self.previous_state != None:
             previous_id = (self.previous_state.id, self.previous_action)
 
@@ -83,8 +84,8 @@ class Agent:
             # print(str(alpha))
 
             td_error = (self.previous_reward + discount * max_qvalue
-                    - self.q_values.get_value(self.previous_state.id,
-                                              self.previous_action))
+                        - self.q_values.get_value(self.previous_state.id,
+                                                  self.previous_action))
 
             for displayer in self.policy.displayers:
                 displayer.notify_td_error(self.previous_state, self.previous_action, td_error)
@@ -108,7 +109,7 @@ class Trainer:
     def train(self, nb_iteration):
         self.agent.q_values.reinit()
         for i in range(nb_iteration):
-            print(i)
+            # print(i, end=' ')
             # print(self.agent.q_values)
             # print("====================\n\n\n")
             self.episode_runner.run()
@@ -116,7 +117,7 @@ class Trainer:
                 displayer = self.displayer
                 class Episode_evaluation(Episode_greedy):
                     def __init__(self, agent, environment):
-                        Episode_greedy.__init__(self, agent, environment)
+                        Episode_greedy.__init__(self, agent,environment, max_step=3000 )
                     def init_run(self):
                         Episode_greedy.init_run(self)
                         #print(self.agent.policy)

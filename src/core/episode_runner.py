@@ -2,6 +2,9 @@ from core.policy import Greedy
 class StateLoop(Exception):
     pass
 
+training_data = []
+
+
 class Episode_runner:
     """
     Execute un episode avec une certaine politique
@@ -53,7 +56,8 @@ class Episode_runner:
             if not self.function(state, reward, state.actions):
                 self.agent.policy = self.saved_policy
                 return -1
-            
+
+        training_data.append(self.environment.nb_step)
         self.end()
         return self.compute_result()
 
@@ -76,8 +80,12 @@ class Episode_train(Episode_runner):
 
         self.agent.compute_q_value(state, reward, self.learning_rate,
                                    self.discount, state.actions)
-
         return True
+
+    def end(self):
+        Episode_runner.end(self)
+        print(str(self.environment.nb_step))
+
 
 class Double_episode(Episode_runner):
     def __init__(self, agent1, agent2, environment, policy=None):
@@ -136,12 +144,17 @@ class Episode_greedy(Episode_runner):
     """
     Permet de faire tourner un episode avec un comportement greedy (pour évaluer la performance de la politique par exemple)
     """
-    def __init__(self, agent, environment):
+    def __init__(self, agent, environment, max_step=None):
         Episode_runner.__init__(self, agent, environment, Greedy())
         self.visited_states = {}
-
+        self.max_step = max_step
+        self.step = 0
+        
     def function(self, state, reward, actions):
+        self.step +=1
         if state in self.visited_states:
+            return False
+        if self.step == self.max_step:
             return False
         Episode_runner.function(self, state, reward, actions)
         self.visited_states[state] = True

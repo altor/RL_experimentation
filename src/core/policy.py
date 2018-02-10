@@ -87,7 +87,7 @@ class N_Greedy(Virtual_Greedy):
         self.n = n
 
     def get_name(self):
-        return "N_greedy_" + str(self.n)
+        return "eGreedy_" + str(self.n)
         
     def before_action(self, state):
         return None
@@ -117,7 +117,7 @@ class Simulated_Anealing_episode_N_Greedy(N_Greedy):
         self.ratio = ratio
 
     def get_name(self):
-        return "SANG_episode_" + str(self.n) + "_" + str(self.ratio)
+        return "eGreedy_SA_episode_" + str(self.n) + "_" + str(self.ratio)
         
     def new_episode(self):
         N_Greedy.new_episode(self)
@@ -138,7 +138,7 @@ class Simulated_Anealing_N_Greedy(N_Greedy):
         self.rendering_info = n
 
     def get_name(self):
-        return "SANG_" + str(self.n) + "_" + str(self.ratio) + "_" + str(self.t)
+        return "eGreddy_SA_" + str(self.n) + "_" + str(self.ratio) + "_" + str(self.t)
         
     def new_episode(self):
         N_Greedy.new_episode(self)
