@@ -32,8 +32,8 @@ class MC_State_gym_discrete(State):
         self.id = (self.velocity, self.position)
 
     def is_terminal(self):
-        # if self.nb_step >= self.max_step:
-        #     return True
+        if self.nb_step >= self.max_step:
+            return True
         if self.position >= 0.5:
             # print("toto")
             return True

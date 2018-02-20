@@ -12,7 +12,7 @@ from sklearn.preprocessing import StandardScaler
 
 zoom_bool=False
 zoom=2
-td_error_threshold=2
+td_error_threshold=8
 threshold=3
 step=0.01
 batch_size = 40
@@ -111,14 +111,18 @@ class Neural_network_estimator(AbstractEstimator):
         self.scaler = pickle.load(f)
         for a in [-1, 0, 1]:
             model = Sequential([
-                Dense(30, input_shape=(2,)),
+                Dense(100, input_shape=(2,), init='lecun_uniform'),
                 Activation('relu'),
-                Dense(30),
+                Dense(100, init='lecun_uniform'),
                 Activation('relu'),
-                # Dense(50),
-                # Activation('tanh'),
-                # Dense(50),
-                # Activation('tanh'),
+                Dense(100),
+                Activation('relu'),
+                Dense(100),
+                Activation('relu'),
+                Dense(100),
+                Activation('relu'),
+                Dense(100),
+                Activation('relu'),
                 Dense(1),
                 Activation('linear'),
             ])
@@ -130,7 +134,7 @@ class Neural_network_estimator(AbstractEstimator):
         print('network ready')
         self.mem = []
         self.mem_target = []
-
+        self.a = 0
     def reinit(self):
         return None
 
@@ -138,6 +142,8 @@ class Neural_network_estimator(AbstractEstimator):
         return True
 
     def get_value(self, state_id, action_id):
+        # self.a += 1
+        # print(self.a)
         x,y = state_id
         # data = self.scaler.transform([[x, y]])
         data = self.scaler.transform([[x, y]])
@@ -159,22 +165,8 @@ class Neural_network_estimator(AbstractEstimator):
     def increase(self, state_id, action_id, td_error):
         q = self.get_value(state_id, action_id)
         x,y = state_id
-        # self.batch.append([x, y])
-        # self.batch_target.append(q + td_error)
-        if q + td_error > 1:
-            print("toto")
-        self.add_to_mem([x, y], q + td_error)
-        if len(self.mem_target) >= mem_lim:
-            data = []
-            target = []
 
-            for _ in range(batch_size):
-                i = random.randint(0,len(self.mem_target) - 1)
-                data.append(self.mem[i])
-                target.append(self.mem_target[i])
-                self.mem.pop(i)
-                self.mem_target.pop(i)
-            # data = self.scaler.transform(self.batch)
-            # data = self.batch + self.mem
-            mlp = self.networks[action_id + 1]
-            mlp.train_on_batch(self.scaler.transform(data), np.array(target))
+        mlp = self.networks[action_id + 1]
+        data = np.array([[x, y]])
+        target = np.array([q])
+        mlp.train_on_batch(self.scaler.transform(data), target)

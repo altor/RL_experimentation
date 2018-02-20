@@ -45,8 +45,9 @@ class Log_displayer_nb_action(Log_displayer):
         Log_displayer.__init__(self, agent, environment, output)
 
     def init_acc_episode(self):
+        self.init_acc
         return 0,0
-        
+
     def init_acc(self):
         acc = {}
         acc['alea'] = []

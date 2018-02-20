@@ -6,10 +6,10 @@ from core.episode_runner import Episode_runner
 
 class Agent:
 
-    def __init__(self, policy, estimator, debug=False):
+    def __init__(self, policy, estimator, alpha_bool=False, debug=False):
         self.policy = policy
         self.debug = debug
-        
+        self.alpha_bool = alpha_bool
         self.final_reward = None
 
         self.previous_state = None
@@ -36,6 +36,7 @@ class Agent:
         """
         self.sa_frequency = {}
         self.policy.new_episode()
+        self.previous_state = None
         
     def decide(self, state):
         action = self.policy.action(state, self.q_values,
@@ -53,7 +54,7 @@ class Agent:
         if state.is_terminal():
             self.q_values.set_value(state.id, 0, reward)
             # self.q_values.get_value(state.id, None, reward)
-            # actions.append(None)
+            actions.append(0)
         if self.previous_state != None:
             previous_id = (self.previous_state.id, self.previous_action)
 
@@ -78,8 +79,7 @@ class Agent:
             if max_qvalue == -1000:
                 max_qvalue = 0
 
-            alpha = learning_rate / (learning_rate +
-                                     self.sa_frequency[previous_id])
+            alpha = learning_rate if self.alpha_bool else learning_rate / (learning_rate + self.sa_frequency[previous_id])
 
             # print(str(alpha))
 
@@ -108,8 +108,8 @@ class Trainer:
 
     def train(self, nb_iteration):
         self.agent.q_values.reinit()
+        self.agent.policy.reinit()
         for i in range(nb_iteration):
-            # print(i, end=' ')
             # print(self.agent.q_values)
             # print("====================\n\n\n")
             self.episode_runner.run()
@@ -128,5 +128,6 @@ class Trainer:
                 episode = Episode_evaluation(self.agent,
                                              self.environment)
                 episode.run()
+            print((i, self.environment.nb_step))
 
         return

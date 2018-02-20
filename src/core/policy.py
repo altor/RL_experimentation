@@ -1,13 +1,13 @@
 import random
-
-
+  
 class Virtual_Greedy:
 
     def __init__(self):
         self.displayers = []
         self.rendering_info = None
 
-
+    def reinit(self):
+        return None
     def get_name(self):
         return ""
         
@@ -64,6 +64,19 @@ class Virtual_Greedy:
         i = random.randint(0, len(actions) - 1)
         return actions[i]
 
+class Pdm_policy_reader(Virtual_Greedy):
+    def __init__(self, pdm_policy):
+        Virtual_Greedy.__init__(self)
+        self.pdm_policy = pdm_policy
+
+    def get_name(self):
+        return "pdm_policy_reader"
+
+    def action(self, state, q_values, sa_frequency):
+        print((state, self.pdm_policy[state]))
+        print("toto")
+        return self.pdm_policy[state]
+    
 class Greedy(Virtual_Greedy):
     def __init__(self):
         Virtual_Greedy.__init__(self)
@@ -85,7 +98,11 @@ class N_Greedy(Virtual_Greedy):
         :param n: 0 < n < 1 probability to choose a random choice
         """
         self.n = n
+        self.init_n = n
 
+    def reinit(self):
+        self.n = self.init_n
+        
     def get_name(self):
         return "eGreedy_" + str(self.n)
         
@@ -122,6 +139,33 @@ class Simulated_Anealing_episode_N_Greedy(N_Greedy):
     def new_episode(self):
         N_Greedy.new_episode(self)
         self.n *= self.ratio
+        self.rendering_info = self.n
+        # print(self.n, end = " ")
+
+
+class Simulated_Anealing_episode_threshold_N_Greedy(N_Greedy):
+    def __init__(self, n, ratio, t):
+        """
+        :param ratio: after t episode, at each new episode, the probability to choose a random choice decrease by ratio (0 < ratio < 1) 
+        """
+        N_Greedy.__init__(self, n)
+        self.t = t
+        self.mem = 0
+        self.ratio = ratio
+
+    def reinit(self):
+        N_Greedy.reinit(self)
+        self.mem = 0
+        
+    def get_name(self):
+        return "eGreedy_SA_episode_" + str(self.n) + "_" + str(self.ratio)
+        
+    def new_episode(self):
+        N_Greedy.new_episode(self)
+        self.mem += 1
+        # print((self.mem, self.n))
+        if self.mem >= self.t:
+            self.n *= self.ratio
         self.rendering_info = self.n
         # print(self.n, end = " ")
 

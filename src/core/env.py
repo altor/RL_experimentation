@@ -46,6 +46,7 @@ class Double_Environment(Environment):
 class PDM(Environment):
 
     def __init__(self):
+        self.convergence = []
         Environment.__init__(self)
         self.states = []
         self.policy = []
@@ -110,7 +111,7 @@ class PDM(Environment):
                         max_val = val
 
                 new_state_values[i] += max_val
-
+            self.convergence.append((new_state_values - state_values).mean())
             if ((new_state_values - state_values) < threshold).all():
                 break
             state_values = new_state_values.copy()
@@ -267,6 +268,9 @@ class Markovian_State(State):
         return l
     
     def next_id(self, action_id):
+        if action_id == None:
+            return self.id
+            
         rank = random.random()
         l = []
         for (s_id, a_id, proba) in self.transitions:
@@ -277,4 +281,5 @@ class Markovian_State(State):
             p += proba
             if rank < p:
                 return s_id
+
         raise ValueError

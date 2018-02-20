@@ -27,6 +27,11 @@ class Log_displayer:
     def init_acc(self):
         return []
 
+    def reinit(self):
+        self.acc = self.init_acc()
+        self.acc_episode = self.init_acc_episode()
+        self.current_episode = 0
+    
     def init_acc_episode(self):
         return []
         

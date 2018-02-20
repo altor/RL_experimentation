@@ -27,7 +27,7 @@ ap.add_argument("--nb_td_error", type=int, default=10)
 ap.add_argument("--action", type=str, default="demo")
 ap.add_argument("--evaluate", type=bool, default=False)
 ap.add_argument("--estimator", type=str, default='grid')
-
+ap.add_argument("--alpha_bool", type=bool, default=False)
 
 ap.add_argument("--policy_name", type=str, default="EG")
 ap.add_argument("--p1", type=float, default=0.2)
@@ -60,9 +60,11 @@ def gen_policy(policy_name, p1=0, p2=0, p3=0):
         return policy.Simulated_Anealing_episode_N_Greedy(p1, p2)
     if policy_name == "EG":
         return  policy.N_Greedy(p1)
+    if policy_name == "SAEETG":
+        return policy.Simulated_Anealing_episode_threshold_N_Greedy(p1, p2, p3)
     
 policy = gen_policy(args['policy_name'], args['p1'], args['p2'], args['p3'])
-agent = Agent(policy, estimator) 
+agent = Agent(policy, estimator, args['alpha_bool']) 
 episode = episode_runner.Episode_train(agent, env, args['learning_rate'], args['discount'])
 trainer = Trainer(agent, env, episode)# , displayer_log)
 
@@ -91,7 +93,7 @@ elif args['action'] == "demo":
     # for i in episode_runner.training_data:
     #     print(i)
 
-    estimator.display_value_function(0.002, 0.02)
+    # estimator.display_value_function(0.002, 0.02)
 
     episode = episode_runner.Episode_greedy(agent, MC_gym_environment(grid_shape, render_bool=True, max_step=1000))
     episode.run()

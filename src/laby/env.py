@@ -64,7 +64,7 @@ class PDM_laby(PDM):
                 
                 if state_type  == 1:
                     continue
-                reward = 1 if state_type  == 2 else 0
+                reward = 1 if state_type  == 2 else -0.1
                 state = State(state_id, reward)
 
                 if state_type == 2:
